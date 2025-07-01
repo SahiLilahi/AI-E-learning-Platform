@@ -1,0 +1,204 @@
+<div class="tutor-dashboard">
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h3>Menu</h3>
+        <button (click)="selectTab('dashboard')">🏠 Dashboard</button>
+        <button (click)="goToCourses()">📚 Manage Courses</button>
+        <button (click)="goToAssessments()">📝 Manage Assessments</button>
+        <button (click)="openModal('assignGradeModal')">🎯 Assign & Grade Assessments</button>
+        <button (click)="openModal('createEventModal')">📅 Create Event</button>
+
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+
+
+        <h2>Tutor Dashboard</h2>
+
+
+        <!-- Dashboard Tabs -->
+        <div class="dashboard-tabs">
+            <button [class.active]="activeTab === 'courses'" (click)="activeTab = 'courses'">📘 Courses</button>
+            <button [class.active]="activeTab === 'assessments'" (click)="activeTab = 'assessments'">📑
+                Assessments</button>
+            <button [class.active]="activeTab === 'students'" (click)="activeTab = 'students'">🎓 Students</button>
+            <button [class.active]="activeTab === 'calendar'" (click)="activeTab = 'calendar'">📆 Calendar</button>
+        </div>
+
+        <!-- Courses Section -->
+        <div *ngIf="activeTab === 'courses'">
+            <h3>📘 Courses</h3>
+            <div class="card-container">
+                <div class="card" *ngFor="let course of courses">
+                    <img *ngIf="course.image" [src]="'http://localhost:5000' + course.image" alt="Course Image">
+                    <h4>{{ course.title }}</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessments Section -->
+        <div *ngIf="activeTab === 'assessments'">
+            <h3>📑 Assessments</h3>
+            <div class="card-container">
+                <div class="card" *ngFor="let assessment of assessments">
+                    <h4>{{ assessment.title }}</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Section -->
+        <div *ngIf="activeTab === 'students'">
+            <h3>🎓 Students</h3>
+            <div class="card-container">
+                <div class="student-card" *ngFor="let student of students">
+                    <h4>{{ student.name }}</h4>
+                    <p>{{ student.email }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Events Section -->
+        <div *ngIf="activeTab === 'calendar'">
+            <h3>📆 Upcoming Events</h3>
+            <div class="event-card-container">
+                <div class="event-card" *ngFor="let event of calendarEvents">
+                    <h4>{{ event.title }}</h4>
+                    <p>{{ event.date | date }}</p>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+<!-- Assign & Grade Assessments Modal -->
+<div id="assignGradeModal" class="modal">
+    <div class="modal-content">
+        <span class="close" (click)="closeModal('assignGradeModal')">&times;</span>
+        <h3>🎯 Assign & Grade Assessments</h3>
+
+        <!-- Tabs Navigation -->
+        <div class="tab-container">
+            <button [class.active]="assignGradeTab === 'assignAI'" (click)="assignGradeTab = 'assignAI'">🤖 Assign AI
+                Assessment</button>
+            <button [class.active]="assignGradeTab === 'assignManual'" (click)="assignGradeTab = 'assignManual'">📄
+                Assign Regular Assessment</button>
+            <button [class.active]="assignGradeTab === 'viewSubmissions'"
+                (click)="assignGradeTab = 'viewSubmissions'">📂 View Submissions</button>
+            <button [class.active]="assignGradeTab === 'grade'" (click)="assignGradeTab = 'grade'">📊 Grade
+                Submissions</button>
+        </div>
+
+        <!-- Assign AI Assessment -->
+        <div *ngIf="assignGradeTab === 'assignAI'">
+            <h3>Assign AI Assessment</h3>
+            <label>Select AI Assessment:</label>
+            <select [(ngModel)]="selectedAIAssessmentId" title="#">
+                <option *ngFor="let a of aiAssessments" [value]="a.id">{{ a.title }}</option>
+            </select>
+
+            <label>Select Students:</label>
+            <select multiple [(ngModel)]="selectedStudentIds" title="#">
+                <option *ngFor="let s of students" [value]="s.id">{{ s.name }}</option>
+            </select>
+
+            <button (click)="assignAIAssessment()">Assign AI Assessment</button>
+        </div>
+
+        <!-- Assign Regular Assessment -->
+        <div *ngIf="assignGradeTab === 'assignManual'">
+            <h3>Assign Regular Assessment</h3>
+            <label>Select Assessment:</label>
+            <select [(ngModel)]="selectedAssessmentId" title="#">
+                <option *ngFor="let assessment of assessments" [value]="assessment.id">{{ assessment.title }}</option>
+            </select>
+
+            <label>Select Student:</label>
+            <select [(ngModel)]="selectedStudentId" title="#">
+                <option *ngFor="let student of students" [value]="student.id">{{ student.name }}</option>
+            </select>
+
+            <button (click)="assignAssessment()">Assign</button>
+        </div>
+
+        <!-- View Submissions -->
+        <div *ngIf="assignGradeTab === 'viewSubmissions'">
+            <h3>📂 Submitted Assessments</h3>
+            <div class="card-container">
+                <div class="card" *ngFor="let submission of submissions">
+                    <h4>📄 Assessment Submission</h4>
+                    <p><strong>Student ID:</strong> {{ submission.studentId }}</p>
+                    <p><strong>Assessment ID:</strong> {{ submission.assessmentId }}</p>
+                    <a [href]="'http://localhost:5000/uploads/' + submission.file" download>
+                        <button>⬇️ Download Submission</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grade Submissions -->
+        <div *ngIf="assignGradeTab === 'grade'">
+            <h3>📊 Grade Submissions</h3>
+            <label>Select Submission:</label>
+            <select [(ngModel)]="selectedSubmissionId" title="#">
+                <option *ngFor="let submission of submissions" [value]="submission.id">
+                    Student ID: {{ submission.studentId }}, Assessment ID: {{ submission.assessmentId }}
+                </option>
+            </select>
+
+            <label>Grade:</label>
+            <select [(ngModel)]="grading.grade" title="#">
+                <option value="">Select Grade</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+                <option value="F">F</option>
+                <option value="Pass">Pass</option>
+                <option value="Fail">Fail</option>
+            </select>
+
+            <label>Feedback:</label>
+            <input type="text" [(ngModel)]="grading.feedback" placeholder="Enter feedback" />
+
+            <button (click)="gradeSubmission()">Submit Grade</button>
+
+            <h3>📑 Student Submissions</h3>
+            <div *ngIf="submissions.length === 0">
+                <p>No submissions available.</p>
+            </div>
+
+            <div class="submissions-container">
+                <table>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Assessment Title</th>
+                        <th>Grade</th>
+                        <th>Feedback</th>
+                    </tr>
+                    <tr *ngFor="let submission of submissions">
+                        <td>{{ submission.studentId }}</td>
+                        <td>{{ submission.assessmentDetails.title }}</td>
+                        <td>{{ submission.grade }}</td>
+                        <td>{{ submission.feedback }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Create Event Modal -->
+<div id="createEventModal" class="modal">
+    <div class="modal-content">
+        <span class="close" (click)="closeModal('createEventModal')">&times;</span>
+        <h3>📅 Schedule an Event</h3>
+        <input type="text" [(ngModel)]="newEvent.title" placeholder="Event Title">
+        <input type="date" [(ngModel)]="newEvent.date" title="#" placeholder="#">
+        <button (click)="addCalendarEvent()">Add Event</button>
+    </div>
+</div>

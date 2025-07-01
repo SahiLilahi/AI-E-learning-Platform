@@ -1,0 +1,120 @@
+<div class="admin-dashboard">
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h3> Admin Menu</h3>
+        <ul>
+            <li (click)="navigateTo('users')" [class.active]="activeSection === 'users'">👤 Users</li>
+            <li (click)="navigateTo('courses')" [class.active]="activeSection === 'courses'">📚 Courses</li>
+            <li (click)="navigateTo('aiAssessments')" [class.active]="activeSection === 'aiAssessments'">🤖 AI
+                Assessments</li>
+            <li (click)="navigateTo('assessments')" [class.active]="activeSection === 'assessments'">📄 Manual
+                Assessments</li>
+            <li (click)="navigateTo('calendar')" [class.active]="activeSection === 'calendar'">📅 Calendar</li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <!-- Top Navbar -->
+        <div class="topbar">
+            <h2>⚙️ Admin Dashboard</h2>
+            <div class="icons">
+                <span class="icon" (click)="toggleCalendar()">📅</span>
+                <span class="icon" (click)="toggleNotifications()">🔔</span>
+            </div>
+        </div>
+
+
+
+        <!-- Dynamic Sections -->
+        <div *ngIf="activeSection === 'users'">
+            <h3>👤 Users</h3>
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+                <tr *ngFor="let user of users">
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.role }}</td>
+                    <td><button (click)="deleteUser(user.id)">🗑 Delete</button></td>
+                </tr>
+            </table>
+        </div>
+
+        <div *ngIf="activeSection === 'courses'">
+            <h3>📚 Courses</h3>
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Actions</th>
+                </tr>
+                <tr *ngFor="let course of courses">
+                    <td>{{ course.id }}</td>
+                    <td>{{ course.title }}</td>
+                    <td><button (click)="deleteCourse(course.id)">🗑 Delete</button></td>
+                </tr>
+            </table>
+        </div>
+
+        <div *ngIf="activeSection === 'aiAssessments'">
+            <h3>🤖 AI Assessments</h3>
+            <table>
+                <tr>
+                    <th>Title</th>
+                    <th>Actions</th>
+                </tr>
+                <tr *ngFor="let ai of aiAssessments">
+                    <td>{{ ai.title }}</td>
+                    <td><button (click)="deleteAIAssessment(ai.id)">🗑 Delete</button></td>
+                </tr>
+            </table>
+        </div>
+
+        <div *ngIf="activeSection === 'calendar'">
+            <h3>📅 Calendar Events</h3>
+            <table>
+                <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+                <tr *ngFor="let event of events">
+                    <td>{{ event.title }}</td>
+                    <td>{{ event.date | date }}</td>
+                    <td><button (click)="deleteCalendarEvent(event.id)">🗑 Delete</button></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- 📌 Notifications Modal -->
+    <div *ngIf="showNotifications" class="modal" (click)="toggleNotifications()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <span class="close" (click)="toggleNotifications()">&times;</span>
+            <h3>🔔 Notifications</h3>
+            <ul class="notification-list">
+                <li *ngFor="let notification of notifications">{{ notification }}</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 📅 Calendar Modal -->
+    <div *ngIf="showCalendar" class="modal" (click)="toggleCalendar()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <span class="close" (click)="toggleCalendar()">&times;</span>
+            <h3>📅 Upcoming Events</h3>
+            <ul class="calendar-list">
+                <li *ngFor="let event of events">
+                    <strong>{{ event.title }}</strong> - {{ event.date | date:'mediumDate' }}
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

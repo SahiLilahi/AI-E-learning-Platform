@@ -1,0 +1,36 @@
+<!-- Navbar/Header -->
+<!-- Navbar/Header -->
+<header class="navbar">
+  <div class="logo">
+    <a routerLink="/">E-Learning</a>
+  </div>
+  <nav>
+
+
+
+
+    <!-- ✅ Show Login & Register if NOT logged in -->
+    <ng-container *ngIf="!isLoggedIn">
+      <ul>
+
+        <li><button routerLink="/login">Login</button></li>
+        <li><button routerLink="/register">Register</button></li>
+      </ul>
+    </ng-container>
+
+    <!-- ✅ Show Logout if logged in -->
+    <ng-container *ngIf="isLoggedIn">
+      <ul>
+
+        <li><button (click)="logout()">Logout</button></li>
+      </ul>
+    </ng-container>
+
+  </nav>
+</header>
+
+
+<!-- Main Content -->
+<main>
+  <router-outlet></router-outlet>
+</main>

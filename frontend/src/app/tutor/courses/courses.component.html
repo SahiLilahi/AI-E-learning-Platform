@@ -1,0 +1,82 @@
+<!-- Tabs -->
+<div class="tabs">
+    <button [class.active]="selectedTab === 'add'" (click)="selectedTab = 'add'">Add Course</button>
+    <button [class.active]="selectedTab === 'available'" (click)="selectedTab = 'available'">Available Courses</button>
+</div>
+
+<!-- Add Course Tab -->
+<div *ngIf="selectedTab === 'add'" class="course-form">
+    <h3>Add New Course</h3>
+
+    <label for="title">Course Title:</label>
+    <input type="text" id="title" [(ngModel)]="newCourse.title" placeholder="Enter course title" />
+
+    <label for="description">Course Description:</label>
+    <textarea id="description" [(ngModel)]="newCourse.description" placeholder="Enter course description"></textarea>
+
+    <label for="image">Upload Course Image:</label>
+    <input type="file" id="image" accept="image/*" (change)="onImageSelected($event)" />
+
+    <label for="material">Upload Study Material:</label>
+    <input type="file" id="material" accept=".pdf,.doc,.docx" (change)="onStudyMaterialSelected($event)" />
+
+    <div class="button-group">
+        <button (click)="addCourse()">Add Course</button>
+    </div>
+</div>
+
+<!-- Available Courses Tab -->
+
+<div *ngIf="selectedTab === 'available'" class="course-list">
+
+    <div *ngFor="let course of courses" class="course-card">
+        <img *ngIf="course.image" [src]="'http://localhost:5000' + course.image" alt="Course Image" />
+
+        <div class="course-info">
+            <h3>{{ course.title }}</h3>
+            <p>{{ course.description }}</p>
+
+            <div class="study-material" *ngIf="course.studyMaterial">
+                <h4>Study Materials:</h4>
+                <ul>
+                    <li *ngFor="let material of parseStudyMaterial(course.studyMaterial)">
+                        <a [href]="'http://localhost:5000' + material" target="_blank">
+                            📄 {{ material.split('/').pop() }}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="course-actions">
+            <button class="edit-btn" (click)="openUpdateModal(course)">Edit</button>
+            <button class="delete-btn" (click)="deleteCourse(course.id)">Delete</button>
+            <button class="generate-btn" (click)="generateAssessment(course)">Generate Assessment</button>
+        </div>
+
+    </div>
+</div>
+
+<!-- Edit Course Modal -->
+<div *ngIf="selectedCourse" class="modal">
+    <div class="modal-content">
+        <h2>Edit Course</h2>
+
+        <label>Title:</label>
+        <input [(ngModel)]="selectedCourse.title" type="text" placeholder="Enter course title" />
+
+        <label>Description:</label>
+        <textarea [(ngModel)]="selectedCourse.description" placeholder="Enter course description"></textarea>
+
+        <label>Upload New Image:</label>
+        <input type="file" (change)="onImageSelected($event)" title="#" placeholder="#" />
+
+        <label>Upload New Study Material:</label>
+        <input type="file" (change)="onStudyMaterialSelected($event)" title="#" placeholder="#" />
+
+        <div class="button-group">
+            <button class="update-btn" (click)="updateCourse()">Update</button>
+            <button class="close-btn" (click)="closeUpdateModal()">Close</button>
+        </div>
+    </div>
+</div>

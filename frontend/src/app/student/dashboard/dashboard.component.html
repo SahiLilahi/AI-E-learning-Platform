@@ -1,0 +1,204 @@
+<div class="student-dashboard">
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h3>📌 Menu</h3>
+        <ul>
+            <li (click)="navigateTo('courses')">📚 Courses</li>
+            <li (click)="navigateTo('assessments')">📝 Assigned Assessments</li>
+            <li (click)="navigateTo('grades')">📊 Grades</li>
+            <li (click)="navigateTo('calendar')">📅 Calendar</li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <!-- Top Navbar -->
+        <div class="topbar">
+            <h2>🎓 Student Dashboard</h2>
+            <div class="icons">
+                <span class="icon" (click)="toggleCalendar()">📅</span>
+                <span class="icon" (click)="toggleNotifications()">🔔</span>
+            </div>
+        </div>
+
+        <!-- Dynamic Sections -->
+        <div *ngIf="activeSection === 'courses'">
+            <h3>📚 All Courses</h3>
+            <div class="course-container">
+                <div class="course-card" *ngFor="let course of courses" (click)="openCourseModal(course)">
+                    <img *ngIf="course.image" [src]="'http://localhost:5000' + course.image" alt="Course Image" />
+                    <h4>{{ course.title }}</h4>
+                    <p>{{ course.description }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="activeSection === 'assessments'">
+            <h3>📝 Assigned Assessments</h3>
+
+            <!-- Tabs -->
+            <div class="tab-buttons">
+                <button [class.active]="selectedTab === 'manual'" (click)="selectedTab = 'manual'">Manual
+                    Assessments</button>
+                <button [class.active]="selectedTab === 'ai'" (click)="selectedTab = 'ai'">AI Assessments</button>
+            </div>
+
+            <!-- Manual Assessments -->
+            <div *ngIf="selectedTab === 'manual'" class="assessment-container">
+                <div class="assessment-card" *ngFor="let assessment of assignedAssessments">
+                    <h4>{{ assessment.assessmentDetails.title }}</h4>
+                    <a *ngIf="assessment.assessmentDetails.file"
+                        [href]="'http://localhost:5000/uploads/' + assessment.assessmentDetails.file" target="_blank"
+                        class="download-btn">📥 Download</a>
+                    <input type="file" (change)="onFileSelected($event, assessment.assessmentDetails.id)"
+                        title="Upload File" />
+                    <button (click)="submitAssessment(assessment.assessmentDetails.id)">📤 Submit</button>
+                </div>
+            </div>
+
+            <!-- AI Assessments -->
+            <div *ngIf="selectedTab === 'ai'" class="assessment-container">
+                <div class="assessment-card" *ngFor="let assessment of aiAssignedAssessments"
+                    (click)="openAssessmentModal(assessment)">
+                    <h4>{{ assessment.title }}</h4>
+                    <p><strong>Prompt:</strong> {{ assessment.prompt }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="activeSection === 'grades'">
+            <h3>📊 Your Grades</h3>
+
+            <!-- Tabs -->
+            <div class="tab-buttons">
+                <button [class.active]="selectedTab === 'manual'" (click)="selectedTab = 'manual'">Manual
+                    Grades</button>
+                <button [class.active]="selectedTab === 'ai'" (click)="selectedTab = 'ai'">AI Grades</button>
+            </div>
+
+            <!-- Manual Grades Section -->
+            <div *ngIf="selectedTab === 'manual'" class="grades-container">
+                <table>
+                    <tr>
+                        <th>Assessment</th>
+                        <th>Grade</th>
+                        <th>Feedback</th>
+                    </tr>
+                    <tr *ngFor="let grade of grades">
+                        <td>{{ grade.assessmentId }}</td>
+                        <td>{{ grade.grade }}</td>
+                        <td>{{ grade.feedback }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- AI Grades Section -->
+            <div *ngIf="selectedTab === 'ai'" class="grades-container">
+                <table>
+                    <tr>
+                        <th>Assessment</th>
+                        <th>Grade</th>
+                        <th>Feedback</th>
+                    </tr>
+                    <tr *ngFor="let aiGrade of aiGrades">
+                        <td>{{ aiGrade.assessmentDetails.title }}</td>
+                        <td>{{ aiGrade.grade }}</td>
+                        <td>{{ aiGrade.feedback }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div *ngIf="activeSection === 'calendar'">
+            <h3>📅 Upcoming Events</h3>
+            <div class="event-container">
+                <div class="event-card" *ngFor="let event of calendarEvents">
+                    <h4>{{ event.title }}</h4>
+                    <p>{{ event.date | date }}</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Course Modal -->
+    <div *ngIf="selectedCourse" class="modal" (click)="closeCourseModal($event)">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <span class="close" (click)="closeCourseModal()">&times;</span>
+            <img *ngIf="selectedCourse.image" [src]="'http://localhost:5000' + selectedCourse.image"
+                alt="Course Image" />
+            <h2>{{ selectedCourse.title }}</h2>
+            <p>{{ selectedCourse.description }}</p>
+
+            <!-- Study Materials List -->
+            <h3>📂 Study Materials</h3>
+            <ul *ngIf="selectedCourse.studyMaterial">
+                <li *ngFor="let material of parseStudyMaterial(selectedCourse.studyMaterial)">
+                    <a [href]="'http://localhost:5000' + material" target="_blank" class="download-btn">
+                        📥 {{ material.split('/').pop() }}
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- AI Assessment Modal -->
+    <div *ngIf="selectedAssessment" class="modal" (click)="closeAssessmentModal($event)">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <span class="close" (click)="closeAssessmentModal()">&times;</span>
+            <h2>{{ selectedAssessment.title }}</h2>
+            <p><strong>Prompt:</strong> {{ selectedAssessment.prompt }}</p>
+
+            <div class="questions-container">
+                <h4>📝 Questions:</h4>
+                <ul>
+                    <li *ngFor="let q of selectedAssessment.questions; let i = index">
+                        <p><strong>Q{{ i + 1 }}:</strong> {{ q.question }}</p>
+
+                        <!-- MCQ Options -->
+                        <ul *ngIf="q.type === 'mcq'">
+                            <li *ngFor="let option of q.options">
+                                <label>
+                                    <input type="radio" [name]="'question_' + i" [value]="option"
+                                        [(ngModel)]="selectedAnswers[i]" />
+                                    {{ option }}
+                                </label>
+                            </li>
+                        </ul>
+
+                        <!-- Subjective Question Input -->
+                        <textarea *ngIf="q.type === 'subjective'" [(ngModel)]="selectedAnswers[i]"
+                            placeholder="Write your answer here..." rows="3"></textarea>
+                    </li>
+                </ul>
+            </div>
+
+            <button (click)="submitAIAssessment(selectedAssessment.id)">📤 Submit</button>
+        </div>
+    </div>
+
+    <!-- 📌 Notifications Modal -->
+    <div *ngIf="showNotifications" class="modal" (click)="toggleNotifications()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <span class="close" (click)="toggleNotifications()">&times;</span>
+            <h3>🔔 Notifications</h3>
+            <ul class="notification-list">
+                <li *ngFor="let notification of notifications">{{ notification }}</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 📅 Calendar Modal -->
+    <div *ngIf="showCalendar" class="modal" (click)="toggleCalendar()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <span class="close" (click)="toggleCalendar()">&times;</span>
+            <h3>📅 Upcoming Events</h3>
+            <ul class="calendar-list">
+                <li *ngFor="let event of calendarEvents">
+                    <strong>{{ event.title }}</strong> - {{ event.date | date:'mediumDate' }}
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</div>

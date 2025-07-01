@@ -1,0 +1,101 @@
+<div class="register-container">
+    <!-- Left-side Image -->
+    <div class="register-image">
+        <img src="assets/images/register-illustration.jpg" alt="Register Illustration">
+    </div>
+
+    <!-- Registration Form -->
+    <div class="register-form">
+        <h2>Sign Up</h2>
+
+        <form (ngSubmit)="register()">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" [(ngModel)]="name" name="name" placeholder="Enter your full name"
+                    required />
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" [(ngModel)]="email" name="email" placeholder="Enter your email"
+                    required />
+            </div>
+
+            <div class="form-group password-group">
+                <label for="password">Password</label>
+                <div class="password-wrapper">
+                    <input [type]="showPassword ? 'text' : 'password'" id="password" [(ngModel)]="password"
+                        name="password" placeholder="Enter your password" required />
+                    <button type="button" class="toggle-password" (click)="togglePassword()">
+                        <img *ngIf="!showPassword" src="assets/icons/eye.svg" alt="Show Password" />
+                        <img *ngIf="showPassword" src="assets/icons/eye-off.svg" alt="Hide Password" />
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group password-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <div class="password-wrapper">
+                    <input [type]="showConfirmPassword ? 'text' : 'password'" id="confirmPassword"
+                        [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Confirm your password"
+                        required />
+                    <button type="button" class="toggle-password" (click)="toggleConfirmPassword()">
+                        <img *ngIf="!showConfirmPassword" src="assets/icons/eye.svg" alt="Show Password" />
+                        <img *ngIf="showConfirmPassword" src="assets/icons/eye-off.svg" alt="Hide Password" />
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="role">Select Role</label>
+                <select id="role" [(ngModel)]="role" name="role">
+                    <option value="student">Student</option>
+                    <option value="tutor">Tutor</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Sign Up</button>
+        </form>
+
+        <div class="login-link">
+            <p>Already have an account? <a routerLink="/login">Login here</a></p>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-container">
+        <!-- Social Media Icons -->
+        <div class="social-media">
+            <h3>Follow Us</h3>
+            <a href="#"><img src="assets\images\Facebook.webp" alt="Facebook"></a>
+            <a href="#"><img src="assets\images\Twitter.webp" alt="Twitter"></a>
+            <a href="#"><img src="assets\images\Linkedin.webp" alt="LinkedIn"></a>
+            <a href="#"><img src="assets\images\Instagram.webp" alt="Instagram"></a>
+        </div>
+
+        <!-- Subscribe Section -->
+        <div class="subscribe">
+            <h3>Subscribe for Updates</h3>
+            <input type="email" placeholder="Enter your email" />
+            <button>Subscribe</button>
+        </div>
+
+        <!-- Useful Links -->
+        <div class="footer-links">
+            <h3>Quick Links</h3>
+            <ul>
+                <li><a routerLink="/courses">Courses</a></li>
+                <li><a routerLink="/tutor">Tutors</a></li>
+                <li><a routerLink="/assessments">Assessments</a></li>
+                <li><a routerLink="/contact">Contact Us</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; 2025 E-Learning Platform. All rights reserved.</p>
+    </div>
+</footer>

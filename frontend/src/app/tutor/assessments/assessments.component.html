@@ -1,0 +1,173 @@
+<h2>Manage Assessments</h2>
+
+<!-- Tabs for different sections -->
+<div class="tabs">
+    <button (click)="activeTab = 'createAssessment'" [class.active]="activeTab === 'createAssessment'">Create
+        Assessment</button>
+    <button (click)="activeTab = 'generateAssessment'" [class.active]="activeTab === 'generateAssessment'">Generate and
+        View AI
+        Assessment</button>
+    <button (click)="activeTab = 'assignAssessment'" [class.active]="activeTab === 'assignAssessment'">Assign AI
+        Assessment</button>
+    <button (click)="activeTab = 'aiSubmissions'" [class.active]="activeTab === 'aiSubmissions'">AI Submissions</button>
+
+</div>
+
+
+<div *ngIf="activeTab === 'createAssessment'">
+    <h3>Create Manual Assessment</h3>
+    <label>Title:</label>
+    <input type="text" [(ngModel)]="newAssessment.title" placeholder="Enter title" title="Assessment Title" />
+
+    <label>Description:</label>
+    <input type="text" [(ngModel)]="newAssessment.description" placeholder="Enter description"
+        title="Assessment Description" />
+
+    <label>Upload File:</label>
+    <input type="file" (change)="onFileSelected($event)" title="Upload Assessment File" />
+
+    <button (click)="addAssessment()">Add Assessment</button>
+
+    <h3>Available Assessments</h3>
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>File</th>
+        </tr>
+        <tr *ngFor="let assessment of assessments">
+            <td>{{ assessment.title }}</td>
+            <td>{{ assessment.description }}</td>
+            <td>
+                <a *ngIf="assessment.file" [href]="'http://localhost:5000/api/assessments/' + assessment.file"
+                    target="_blank">
+                    Download File
+                </a>
+                <button (click)="deleteAssessment(assessment.id)">Delete</button>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- Generate AI Assessment Tab -->
+<div *ngIf="activeTab === 'generateAssessment'">
+    <h3>Generate Assessment using AI</h3>
+
+    <!-- Description input -->
+    <textarea [(ngModel)]="aiAssessmentDescription"
+        placeholder="Enter description or instructions for the AI (optional)">
+</textarea>
+
+    <!-- File input -->
+    <input type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx,.txt" title="#" />
+
+    <!-- Generate button -->
+    <button (click)="uploadAndGenerateAssessment()">
+        Upload & Generate AI Assessment
+    </button>
+
+
+    <h3>📚 AI-Generated Assessments</h3>
+    <ul>
+        <li *ngFor="let assessment of aiAssessments">
+            <h4>{{ assessment.title }}</h4>
+            <p>{{ assessment.description }}</p>
+            <button (click)="toggleAIAssessment(assessment)">
+                {{ selectedAssessment === assessment ? 'Hide Questions' : 'View Questions' }}
+            </button>
+            <div *ngIf="selectedAssessment === assessment">
+                <h4>Questions:</h4>
+                <ul>
+                    <li *ngFor="let q of parseQuestions(assessment.questions)">
+                        <p><strong>Q:</strong> {{ q.question }}</p>
+                        <ul *ngIf="q.type === 'mcq'">
+                            <li *ngFor="let option of q.options">
+                                <input type="radio" [name]="q.question" [value]="option" title="#" placeholder="#" /> {{
+                                option }}
+                            </li>
+                        </ul>
+                        <div *ngIf="q.type === 'subjective'">
+                            <textarea placeholder="Write your answer..."></textarea>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </li>
+    </ul>
+</div>
+
+<!-- Assign AI Assessment Tab -->
+<div *ngIf="activeTab === 'assignAssessment'" class="assign-assessment">
+    <h3>Assign AI Assessment</h3>
+
+    <!-- AI Assessment Dropdown -->
+    <label for="assessment">Select AI Assessment:</label>
+    <select id="assessment" [(ngModel)]="selectedAIAssessmentId" title="Select AI Assessment">
+        <option *ngFor="let a of aiAssessments" [value]="a.id">{{ a.title }}</option>
+    </select>
+
+    <!-- Student Selection -->
+    <label for="students">Select Students:</label>
+    <select id="students" multiple [(ngModel)]="selectedStudentIds" title="Select Students">
+        <option *ngFor="let s of students" [value]="s.id">{{ s.name }}</option>
+    </select>
+
+    <!-- Assign Button -->
+    <button (click)="assignAIAssessment()">Assign AI Assessment</button>
+</div>
+
+
+<!-- AI Submissions Tab -->
+<div *ngIf="activeTab === 'aiSubmissions'" class="ai-submissions-container">
+    <h3>AI Student Submissions</h3>
+
+    <div class="dropdown-container">
+        <label for="submissionSelect" class="dropdown-label">Select Submission</label>
+        <select id="submissionSelect" [(ngModel)]="selectedSubmissionId" title="Select Submission"
+            class="submission-select">
+            <option *ngFor="let submission of aiSubmissions" [ngValue]="submission.id">
+
+                Submission ID: {{ submission.id }} |
+                Student ID: {{ submission.studentId }} |
+                Assessment ID: {{ submission.assessmentId }}
+            </option>
+        </select>
+    </div>
+
+    <div class="button-container">
+        <button class="view-button" (click)="toggleAISubmission(selectedSubmissionId)">
+            View Submission
+        </button>
+        <button class="grade-button" (click)="gradeWithAI()">Grade with AI</button>
+    </div>
+
+    <!-- Modal -->
+    <div *ngIf="isModalOpen" class="modal-overlay" (click)="closeModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <h4>Submission Responses</h4>
+
+            <div>
+                <p><strong>Submission ID:</strong> {{ selectedSubmission?.id }}</p>
+                <p><strong>Student ID:</strong> {{ selectedSubmission?.studentId }}</p>
+                <p><strong>Assessment ID:</strong> {{ selectedSubmission?.assessmentId }}</p>
+                <p><strong>Grade:</strong> {{ selectedSubmission?.grade }}</p>
+                <p><strong>Feedback:</strong> {{ selectedSubmission?.feedback || 'N/A' }}</p>
+
+            </div>
+
+            <div *ngFor="let response of selectedSubmission?.questions_responses" class="question-block">
+                <div *ngIf="response.type === 'mcq'" class="mcq-response">
+                    <p><strong>Question:</strong> {{ response.question }}</p>
+                    <p><strong>Your Answer:</strong> {{ response.student_response }}</p>
+                    <p><strong>Correct Answer:</strong> {{ response.correct_answer }}</p>
+                </div>
+                <div *ngIf="response.type === 'subjective'" class="subjective-response">
+                    <p><strong>Question:</strong> {{ response.question }}</p>
+                    <p><strong>Your Answer:</strong> {{ response.student_response }}</p>
+                </div>
+            </div>
+
+            <button class="close-btn" (click)="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
